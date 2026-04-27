@@ -8,13 +8,16 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include <emmintrin.h>
-#include <xmmintrin.h>
+#include "rtc_base/system/arch.h"
 
 #include "audio_processing/utility/ooura_fft.h"
 #include "audio_processing/utility/ooura_fft_tables_common.h"
 #include "audio_processing/utility/ooura_fft_tables_neon_sse2.h"
-#include "rtc_base/system/arch.h"
+
+#if defined(WEBRTC_ARCH_X86_FAMILY)
+#include <emmintrin.h>
+#include <xmmintrin.h>
+#endif
 
 namespace webrtc {
 
