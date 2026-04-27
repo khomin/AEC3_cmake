@@ -80,3 +80,9 @@ target_include_directories(${PROJECT} PUBLIC
 )
 
 set_target_properties(${PROJECT} PROPERTIES LINKER_LANGUAGE CXX)
+
+install(TARGETS ${PROJECT}
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+)
