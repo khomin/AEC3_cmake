@@ -15,6 +15,10 @@
 #include <sys/syscall.h>
 #endif
 
+#if defined(WEBRTC_WIN) && defined(__MINGW32__)
+#include <windows.h>
+#endif
+
 namespace rtc {
 
 PlatformThreadId CurrentThreadId() {
@@ -57,9 +61,8 @@ bool IsThreadRefEqual(const PlatformThreadRef& a, const PlatformThreadRef& b) {
 }
 
 void SetCurrentThreadName(const char* name) {
-#if defined(WEBRTC_WIN)
-  // For details see:
-  // https://docs.microsoft.com/en-us/visualstudio/debugger/how-to-set-a-thread-name-in-native-code
+#if defined(WEBRTC_WIN) && !defined(__MINGW32__)
+  // Original MSVC implementation with SEH
 #pragma pack(push, 8)
   struct {
     DWORD dwType;
@@ -77,6 +80,16 @@ void SetCurrentThreadName(const char* name) {
   } __except (EXCEPTION_EXECUTE_HANDLER) {  // NOLINT
   }
 #pragma warning(pop)
+#elif defined(WEBRTC_WIN) && defined(__MINGW32__)
+  // MinGW-compatible version (no SEH)
+  typedef HRESULT (WINAPI *SetThreadDescription_t)(HANDLE, PCWSTR);
+  SetThreadDescription_t pSetThreadDescription = (SetThreadDescription_t)GetProcAddress(
+      GetModuleHandleW(L"kernel32.dll"), "SetThreadDescription");
+  if (pSetThreadDescription) {
+    wchar_t wname[256];
+    MultiByteToWideChar(CP_UTF8, 0, name, -1, wname, 256);
+    pSetThreadDescription(GetCurrentThread(), wname);
+  }
 #elif defined(WEBRTC_LINUX) || defined(WEBRTC_ANDROID)
   prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(name));  // NOLINT
 #elif defined(WEBRTC_MAC) || defined(WEBRTC_IOS)
