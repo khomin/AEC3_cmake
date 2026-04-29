@@ -81,8 +81,15 @@ target_include_directories(${PROJECT} PUBLIC
 
 set_target_properties(${PROJECT} PROPERTIES LINKER_LANGUAGE CXX)
 
+install(FILES build_config.h DESTINATION include)
+install(DIRECTORY api/ DESTINATION include/api)
+install(DIRECTORY audio_processing/ DESTINATION include/audio_processing
+    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+install(DIRECTORY base/ DESTINATION include/base
+    FILES_MATCHING PATTERN "*.h")
+
 install(TARGETS ${PROJECT}
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
 )
